@@ -40,26 +40,34 @@
             position: relative;
         }
 
-        .cog-btn svg { transition: transform 0.3s ease; }
-        .cog-btn:hover svg { transform: rotate(90deg); }
+            .cog-btn svg {
+                transition: transform 0.3s ease;
+            }
 
-        .cog-btn::before {
-            content: "Ayarları Değiştir";
-            position: absolute;
-            right: 55px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #333;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 5px;
-            font-size: 13px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .cog-btn:hover::before { opacity: 1; }
+            .cog-btn:hover svg {
+                transform: rotate(90deg);
+            }
+
+            .cog-btn::before {
+                content: "Ayarları Değiştir";
+                position: absolute;
+                right: 55px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: #333;
+                color: white;
+                padding: 5px 12px;
+                border-radius: 5px;
+                font-size: 13px;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .cog-btn:hover::before {
+                opacity: 1;
+            }
 
         #settings-panel {
             margin-top: 10px;
@@ -71,9 +79,18 @@
             width: 200px;
         }
 
-        .setting-item { margin-bottom: 15px; }
-        .setting-item label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
-        
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+            .setting-item label {
+                display: block;
+                font-size: 12px;
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #555;
+            }
+
         select, input[type="color"] {
             width: 100%;
             padding: 5px;
@@ -112,7 +129,8 @@
 
         .number {
             position: absolute;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             text-align: center;
             font-size: 1.4rem;
             font-weight: bold;
@@ -122,17 +140,28 @@
             transform: rotate(var(--rotation));
             pointer-events: none;
         }
-        .number span { display: inline-block; transform: rotate(calc(var(--rotation) * -1)); }
+
+            .number span {
+                display: inline-block;
+                transform: rotate(calc(var(--rotation) * -1));
+            }
 
         .tick {
             position: absolute;
-            width: 2px; height: 10px;
+            width: 2px;
+            height: 10px;
             background: #aaa;
-            left: 50%; top: 5px;
+            left: 50%;
+            top: 5px;
             transform-origin: 50% 155px;
             transform: translateX(-50%) rotate(var(--rotation));
         }
-        .tick.hour-tick { width: 4px; height: 18px; background: #333; }
+
+            .tick.hour-tick {
+                width: 4px;
+                height: 18px;
+                background: #333;
+            }
 
         .hand {
             position: absolute;
@@ -143,15 +172,37 @@
             transform: translateX(-50%);
         }
 
-        .hour { width: 8px; height: 80px; background: #333; z-index: 4; }
-        .minute { width: 5px; height: 120px; background: #e74c3c; z-index: 3; }
-        .second { width: 2px; height: 130px; background: #27ae60; z-index: 5; }
+        .hour {
+            width: 8px;
+            height: 80px;
+            background: #333;
+            z-index: 4;
+        }
 
-        #clock-right .hand { cursor: grab; }
+        .minute {
+            width: 5px;
+            height: 120px;
+            background: #e74c3c;
+            z-index: 3;
+        }
+
+        .second {
+            width: 2px;
+            height: 130px;
+            background: #27ae60;
+            z-index: 5;
+        }
+
+        #clock-right .hand {
+            cursor: grab;
+        }
+
         .center {
             position: absolute;
-            top: 50%; left: 50%;
-            width: 16px; height: 16px;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
             background: #333;
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -160,7 +211,8 @@
 
         .brand {
             position: absolute;
-            top: 68%; width: 100%;
+            top: 68%;
+            width: 100%;
             text-align: center;
             font-weight: 800;
             color: #999;
@@ -236,54 +288,54 @@
         let selectedUTC = 3; // Varsayılan Türkiye
 
         cogBtn.addEventListener('click', () => {
-            const isVisible = settingsPanel.style.display === 'block';
-            settingsPanel.style.display = isVisible ? 'none' : 'block';
+        const isVisible = settingsPanel.style.display === 'block';
+        settingsPanel.style.display = isVisible ? 'none' : 'block';
         });
 
         colorPicker.addEventListener('input', (e) => {
-            clocks.forEach(clock => clock.style.borderColor = e.target.value);
+        clocks.forEach(clock => clock.style.borderColor = e.target.value);
         });
 
         timezonePicker.addEventListener('change', (e) => {
-            selectedUTC = parseFloat(e.target.value);
-            refCityLabel.innerText = e.target.options[e.target.selectedIndex].text + " (Referans)";
+        selectedUTC = parseFloat(e.target.value);
+        refCityLabel.innerText = e.target.options[e.target.selectedIndex].text + " (Referans)";
         });
 
         // --- KADRAN OLUŞTURMA ---
         function createFace(ticksId, numsId) {
-            const ticks = document.getElementById(ticksId);
-            const nums = document.getElementById(numsId);
-            for (let i = 0; i < 60; i++) {
-                const t = document.createElement('div');
-                t.className = i % 5 === 0 ? 'tick hour-tick' : 'tick';
-                t.style.setProperty('--rotation', `${i * 6}deg`);
-                ticks.appendChild(t);
-            }
-            for (let i = 1; i <= 12; i++) {
-                const n = document.createElement('div');
-                n.className = 'number';
-                n.style.setProperty('--rotation', `${i * 30}deg`);
-                n.innerHTML = `<span>${i}</span>`;
-                nums.appendChild(n);
-            }
+        const ticks = document.getElementById(ticksId);
+        const nums = document.getElementById(numsId);
+        for (let i = 0; i < 60; i++) {
+        const t = document.createElement('div');
+        t.className = i % 5 === 0 ? 'tick hour-tick' : 'tick';
+        t.style.setProperty('--rotation', `${i * 6}deg`);
+        ticks.appendChild(t);
+        }
+        for (let i = 1; i <= 12; i++) {
+        const n = document.createElement('div');
+        n.className = 'number';
+        n.style.setProperty('--rotation', `${i * 30}deg`);
+        n.innerHTML = `<span>${i}</span>`;
+        nums.appendChild(n);
+        }
         }
         createFace('ticks-left', 'numbers-left');
         createFace('ticks-right', 'numbers-right');
 
         // --- SOL SAAT: GLOBAL ZAMAN ---
         function updateLeftClock() {
-            const now = new Date();
-            // Yerel saati UTC'ye çevirip seçilen offseti ekle
-            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const d = new Date(utcTime + (3600000 * selectedUTC));
+        const now = new Date();
+        // Yerel saati UTC'ye çevirip seçilen offseti ekle
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const d = new Date(utcTime + (3600000 * selectedUTC));
 
-            const s = d.getSeconds();
-            const m = d.getMinutes();
-            const h = d.getHours();
+        const s = d.getSeconds();
+        const m = d.getMinutes();
+        const h = d.getHours();
 
-            document.getElementById('second-left').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
-            document.getElementById('minute-left').style.transform = `translateX(-50%) rotate(${m * 6 + s * 0.1}deg)`;
-            document.getElementById('hour-left').style.transform = `translateX(-50%) rotate(${(h % 12) * 30 + m * 0.5}deg)`;
+        document.getElementById('second-left').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+        document.getElementById('minute-left').style.transform = `translateX(-50%) rotate(${m * 6 + s * 0.1}deg)`;
+        document.getElementById('hour-left').style.transform = `translateX(-50%) rotate(${(h % 12) * 30 + m * 0.5}deg)`;
         }
         setInterval(updateLeftClock, 1000);
         updateLeftClock();
@@ -298,30 +350,30 @@
         let prevMinuteAngle = 0;
 
         function updateRightDisplay() {
-            rightMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
-            rightHour.style.transform = `translateX(-50%) rotate(${baseHourAngle + (minuteAngle / 12)}deg)`;
+        rightMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+        rightHour.style.transform = `translateX(-50%) rotate(${baseHourAngle + (minuteAngle / 12)}deg)`;
         }
 
         const startDrag = (e) => { activeHand = e.target; document.body.style.cursor = 'grabbing'; };
         const stopDrag = () => { activeHand = null; document.body.style.cursor = 'default'; };
 
         const doDrag = (e) => {
-            if (!activeHand) return;
-            const rect = rightClock.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            let angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
-            if (angle < 0) angle += 360;
+        if (!activeHand) return;
+        const rect = rightClock.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        let angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
+        if (angle < 0) angle += 360;
 
-            if (activeHand.id === 'minute-right') {
-                if (prevMinuteAngle > 300 && angle < 60) baseHourAngle += 30;
-                else if (prevMinuteAngle < 60 && angle > 300) baseHourAngle -= 30;
-                minuteAngle = angle;
-                prevMinuteAngle = angle;
-            } else {
-                baseHourAngle = angle - (minuteAngle / 12);
-            }
-            updateRightDisplay();
+        if (activeHand.id === 'minute-right') {
+        if (prevMinuteAngle > 300 && angle < 60) baseHourAngle += 30;
+        else if (prevMinuteAngle < 60 && angle > 300) baseHourAngle -= 30;
+        minuteAngle = angle;
+        prevMinuteAngle = angle;
+        } else {
+        baseHourAngle = angle - (minuteAngle / 12);
+        }
+        updateRightDisplay();
         };
 
         rightMinute.addEventListener('mousedown', startDrag);
