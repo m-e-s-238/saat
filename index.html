@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>M.E.S. Hibrit Mekanik Saatler</title>
+    <title>M.E.S. SAAT - Global Control</title>
     <style>
         body {
             display: flex;
@@ -16,6 +16,72 @@
             padding: 20px;
         }
 
+        /* --- AYARLAR PANELİ --- */
+        .settings-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .cog-btn {
+            background: white;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .cog-btn svg { transition: transform 0.3s ease; }
+        .cog-btn:hover svg { transform: rotate(90deg); }
+
+        .cog-btn::before {
+            content: "Ayarları Değiştir";
+            position: absolute;
+            right: 55px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #333;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 13px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .cog-btn:hover::before { opacity: 1; }
+
+        #settings-panel {
+            margin-top: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: none;
+            width: 200px;
+        }
+
+        .setting-item { margin-bottom: 15px; }
+        .setting-item label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        
+        select, input[type="color"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* --- SAATLER --- */
         .clocks-container {
             display: flex;
             gap: 50px;
@@ -39,17 +105,14 @@
             border: 12px solid #333;
             border-radius: 50%;
             box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-            /* --- KRİTİK EKLENTİ BURASI --- */
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
-            /* ---------------------------- */
         }
 
         .number {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             text-align: center;
             font-size: 1.4rem;
             font-weight: bold;
@@ -59,28 +122,17 @@
             transform: rotate(var(--rotation));
             pointer-events: none;
         }
-
-            .number span {
-                display: inline-block;
-                transform: rotate(calc(var(--rotation) * -1));
-            }
+        .number span { display: inline-block; transform: rotate(calc(var(--rotation) * -1)); }
 
         .tick {
             position: absolute;
-            width: 2px;
-            height: 10px;
+            width: 2px; height: 10px;
             background: #aaa;
-            left: 50%;
-            top: 5px;
+            left: 50%; top: 5px;
             transform-origin: 50% 155px;
             transform: translateX(-50%) rotate(var(--rotation));
         }
-
-            .tick.hour-tick {
-                width: 4px;
-                height: 18px;
-                background: #333;
-            }
+        .tick.hour-tick { width: 4px; height: 18px; background: #333; }
 
         .hand {
             position: absolute;
@@ -91,41 +143,15 @@
             transform: translateX(-50%);
         }
 
-        .hour {
-            width: 8px;
-            height: 80px;
-            background: #333;
-            z-index: 4;
-        }
+        .hour { width: 8px; height: 80px; background: #333; z-index: 4; }
+        .minute { width: 5px; height: 120px; background: #e74c3c; z-index: 3; }
+        .second { width: 2px; height: 130px; background: #27ae60; z-index: 5; }
 
-        .minute {
-            width: 5px;
-            height: 120px;
-            background: #e74c3c;
-            z-index: 3;
-        }
-
-        .second {
-            width: 2px;
-            height: 130px;
-            background: #27ae60;
-            z-index: 5;
-        }
-
-        #clock-right .hand {
-            cursor: grab;
-        }
-
-            #clock-right .hand:active {
-                cursor: grabbing;
-            }
-
+        #clock-right .hand { cursor: grab; }
         .center {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
+            top: 50%; left: 50%;
+            width: 16px; height: 16px;
             background: #333;
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -134,8 +160,7 @@
 
         .brand {
             position: absolute;
-            top: 68%;
-            width: 100%;
+            top: 68%; width: 100%;
             text-align: center;
             font-weight: 800;
             color: #999;
@@ -146,13 +171,37 @@
 </head>
 <body>
 
-    <h1 style="margin-bottom: 30px;">M.E.S. Mekanik: Referans ve Manuel Kontrol</h1>
+    <div class="settings-wrapper">
+        <div class="cog-btn" id="cog-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <div id="settings-panel">
+            <div class="setting-item">
+                <label>Çerçeve Rengi</label>
+                <input type="color" id="frame-color-picker" value="#333333">
+            </div>
+            <div class="setting-item">
+                <label>Zaman Dilimi (Referans)</label>
+                <select id="timezone-picker">
+                    <option value="3" selected>İstanbul (UTC+3)</option>
+                    <option value="0">Londra (UTC+0)</option>
+                    <option value="1">Berlin (UTC+1)</option>
+                    <option value="-5">New York (UTC-5)</option>
+                    <option value="9">Tokyo (UTC+9)</option>
+                    <option value="-8">Los Angeles (UTC-8)</option>
+                    <option value="10">Sidney (UTC+10)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <h1 style="margin-bottom: 30px; font-size: 2.5rem; color: #333;">M.E.S. SAAT</h1>
 
     <div class="clocks-container">
         <div class="clock-wrapper">
-            <h3>Sol Saat (Otomatik)</h3>
+            <h3 id="ref-city">İstanbul (Referans)</h3>
             <div id="clock-left" class="clock">
-                <div class="brand">REFERANS</div>
+                <div class="brand">REFERENCE</div>
                 <div id="ticks-left"></div>
                 <div id="numbers-left"></div>
                 <div class="center"></div>
@@ -163,9 +212,9 @@
         </div>
 
         <div class="clock-wrapper">
-            <h3>Sağ Saat (Manuel Ayar)</h3>
+            <h3>Manuel Ayar Paneli</h3>
             <div id="clock-right" class="clock">
-                <div class="brand">MANUEL AYAR</div>
+                <div class="brand">MANUAL</div>
                 <div id="ticks-right"></div>
                 <div id="numbers-right"></div>
                 <div class="center"></div>
@@ -176,80 +225,109 @@
     </div>
 
     <script>
+        // --- AYARLAR VE RENK ---
+        const cogBtn = document.getElementById('cog-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const colorPicker = document.getElementById('frame-color-picker');
+        const timezonePicker = document.getElementById('timezone-picker');
+        const refCityLabel = document.getElementById('ref-city');
+        const clocks = document.querySelectorAll('.clock');
+
+        let selectedUTC = 3; // Varsayılan Türkiye
+
+        cogBtn.addEventListener('click', () => {
+            const isVisible = settingsPanel.style.display === 'block';
+            settingsPanel.style.display = isVisible ? 'none' : 'block';
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            clocks.forEach(clock => clock.style.borderColor = e.target.value);
+        });
+
+        timezonePicker.addEventListener('change', (e) => {
+            selectedUTC = parseFloat(e.target.value);
+            refCityLabel.innerText = e.target.options[e.target.selectedIndex].text + " (Referans)";
+        });
+
+        // --- KADRAN OLUŞTURMA ---
         function createFace(ticksId, numsId) {
-        const ticks = document.getElementById(ticksId);
-        const nums = document.getElementById(numsId);
-        for (let i = 0; i < 60; i++) {
-        const t = document.createElement('div');
-        t.className = i % 5 === 0 ? 'tick hour-tick' : 'tick';
-        t.style.setProperty('--rotation', `${i * 6}deg`);
-        ticks.appendChild(t);
-        }
-        for (let i = 1; i <= 12; i++) {
-        const n = document.createElement('div');
-        n.className = 'number';
-        n.style.setProperty('--rotation', `${i * 30}deg`);
-        n.innerHTML = `<span>${i}</span>`;
-        nums.appendChild(n);
-        }
+            const ticks = document.getElementById(ticksId);
+            const nums = document.getElementById(numsId);
+            for (let i = 0; i < 60; i++) {
+                const t = document.createElement('div');
+                t.className = i % 5 === 0 ? 'tick hour-tick' : 'tick';
+                t.style.setProperty('--rotation', `${i * 6}deg`);
+                ticks.appendChild(t);
+            }
+            for (let i = 1; i <= 12; i++) {
+                const n = document.createElement('div');
+                n.className = 'number';
+                n.style.setProperty('--rotation', `${i * 30}deg`);
+                n.innerHTML = `<span>${i}</span>`;
+                nums.appendChild(n);
+            }
         }
         createFace('ticks-left', 'numbers-left');
         createFace('ticks-right', 'numbers-right');
 
+        // --- SOL SAAT: GLOBAL ZAMAN ---
         function updateLeftClock() {
-        const d = new Date();
-        const s = d.getSeconds();
-        const m = d.getMinutes();
-        const h = d.getHours();
-        document.getElementById('second-left').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
-        document.getElementById('minute-left').style.transform = `translateX(-50%) rotate(${m * 6 + s * 0.1}deg)`;
-        document.getElementById('hour-left').style.transform = `translateX(-50%) rotate(${(h % 12) * 30 + m * 0.5}deg)`;
+            const now = new Date();
+            // Yerel saati UTC'ye çevirip seçilen offseti ekle
+            const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const d = new Date(utcTime + (3600000 * selectedUTC));
+
+            const s = d.getSeconds();
+            const m = d.getMinutes();
+            const h = d.getHours();
+
+            document.getElementById('second-left').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+            document.getElementById('minute-left').style.transform = `translateX(-50%) rotate(${m * 6 + s * 0.1}deg)`;
+            document.getElementById('hour-left').style.transform = `translateX(-50%) rotate(${(h % 12) * 30 + m * 0.5}deg)`;
         }
         setInterval(updateLeftClock, 1000);
         updateLeftClock();
 
+        // --- SAĞ SAAT: MANUEL ---
         const rightHour = document.getElementById('hour-right');
         const rightMinute = document.getElementById('minute-right');
         const rightClock = document.getElementById('clock-right');
-
         let activeHand = null;
         let baseHourAngle = 360;
         let minuteAngle = 0;
         let prevMinuteAngle = 0;
 
         function updateRightDisplay() {
-        rightMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
-        const finalHourAngle = baseHourAngle + (minuteAngle / 12);
-        rightHour.style.transform = `translateX(-50%) rotate(${finalHourAngle}deg)`;
+            rightMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            rightHour.style.transform = `translateX(-50%) rotate(${baseHourAngle + (minuteAngle / 12)}deg)`;
         }
 
         const startDrag = (e) => { activeHand = e.target; document.body.style.cursor = 'grabbing'; };
         const stopDrag = () => { activeHand = null; document.body.style.cursor = 'default'; };
 
         const doDrag = (e) => {
-        if (!activeHand) return;
-        const rect = rightClock.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        let angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
-        if (angle < 0) angle += 360;
+            if (!activeHand) return;
+            const rect = rightClock.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
+            if (angle < 0) angle += 360;
 
-        if (activeHand.id === 'minute-right') {
-        if (prevMinuteAngle > 300 && angle < 60) baseHourAngle += 30;
-        else if (prevMinuteAngle < 60 && angle > 300) baseHourAngle -= 30;
-        minuteAngle = angle;
-        prevMinuteAngle = angle;
-        } else {
-        baseHourAngle = angle - (minuteAngle / 12);
-        }
-        updateRightDisplay();
+            if (activeHand.id === 'minute-right') {
+                if (prevMinuteAngle > 300 && angle < 60) baseHourAngle += 30;
+                else if (prevMinuteAngle < 60 && angle > 300) baseHourAngle -= 30;
+                minuteAngle = angle;
+                prevMinuteAngle = angle;
+            } else {
+                baseHourAngle = angle - (minuteAngle / 12);
+            }
+            updateRightDisplay();
         };
 
         rightMinute.addEventListener('mousedown', startDrag);
         rightHour.addEventListener('mousedown', startDrag);
         window.addEventListener('mousemove', doDrag);
         window.addEventListener('mouseup', stopDrag);
-
         updateRightDisplay();
     </script>
 </body>
