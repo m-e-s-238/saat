@@ -1,0 +1,256 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>M.E.S. Hibrit Mekanik Saatler</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .clocks-container {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .clock-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .clock {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            background: white;
+            border: 12px solid #333;
+            border-radius: 50%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            /* --- KRİTİK EKLENTİ BURASI --- */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            /* ---------------------------- */
+        }
+
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #222;
+            padding: 22px;
+            box-sizing: border-box;
+            transform: rotate(var(--rotation));
+            pointer-events: none;
+        }
+
+            .number span {
+                display: inline-block;
+                transform: rotate(calc(var(--rotation) * -1));
+            }
+
+        .tick {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #aaa;
+            left: 50%;
+            top: 5px;
+            transform-origin: 50% 155px;
+            transform: translateX(-50%) rotate(var(--rotation));
+        }
+
+            .tick.hour-tick {
+                width: 4px;
+                height: 18px;
+                background: #333;
+            }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 10px;
+            transform: translateX(-50%);
+        }
+
+        .hour {
+            width: 8px;
+            height: 80px;
+            background: #333;
+            z-index: 4;
+        }
+
+        .minute {
+            width: 5px;
+            height: 120px;
+            background: #e74c3c;
+            z-index: 3;
+        }
+
+        .second {
+            width: 2px;
+            height: 130px;
+            background: #27ae60;
+            z-index: 5;
+        }
+
+        #clock-right .hand {
+            cursor: grab;
+        }
+
+            #clock-right .hand:active {
+                cursor: grabbing;
+            }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 6;
+        }
+
+        .brand {
+            position: absolute;
+            top: 68%;
+            width: 100%;
+            text-align: center;
+            font-weight: 800;
+            color: #999;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="margin-bottom: 30px;">M.E.S. Mekanik: Referans ve Manuel Kontrol</h1>
+
+    <div class="clocks-container">
+        <div class="clock-wrapper">
+            <h3>Sol Saat (Otomatik)</h3>
+            <div id="clock-left" class="clock">
+                <div class="brand">REFERANS</div>
+                <div id="ticks-left"></div>
+                <div id="numbers-left"></div>
+                <div class="center"></div>
+                <div id="hour-left" class="hand hour"></div>
+                <div id="minute-left" class="hand minute"></div>
+                <div id="second-left" class="hand second"></div>
+            </div>
+        </div>
+
+        <div class="clock-wrapper">
+            <h3>Sağ Saat (Manuel Ayar)</h3>
+            <div id="clock-right" class="clock">
+                <div class="brand">MANUEL AYAR</div>
+                <div id="ticks-right"></div>
+                <div id="numbers-right"></div>
+                <div class="center"></div>
+                <div id="hour-right" class="hand hour"></div>
+                <div id="minute-right" class="hand minute"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createFace(ticksId, numsId) {
+        const ticks = document.getElementById(ticksId);
+        const nums = document.getElementById(numsId);
+        for (let i = 0; i < 60; i++) {
+        const t = document.createElement('div');
+        t.className = i % 5 === 0 ? 'tick hour-tick' : 'tick';
+        t.style.setProperty('--rotation', `${i * 6}deg`);
+        ticks.appendChild(t);
+        }
+        for (let i = 1; i <= 12; i++) {
+        const n = document.createElement('div');
+        n.className = 'number';
+        n.style.setProperty('--rotation', `${i * 30}deg`);
+        n.innerHTML = `<span>${i}</span>`;
+        nums.appendChild(n);
+        }
+        }
+        createFace('ticks-left', 'numbers-left');
+        createFace('ticks-right', 'numbers-right');
+
+        function updateLeftClock() {
+        const d = new Date();
+        const s = d.getSeconds();
+        const m = d.getMinutes();
+        const h = d.getHours();
+        document.getElementById('second-left').style.transform = `translateX(-50%) rotate(${s * 6}deg)`;
+        document.getElementById('minute-left').style.transform = `translateX(-50%) rotate(${m * 6 + s * 0.1}deg)`;
+        document.getElementById('hour-left').style.transform = `translateX(-50%) rotate(${(h % 12) * 30 + m * 0.5}deg)`;
+        }
+        setInterval(updateLeftClock, 1000);
+        updateLeftClock();
+
+        const rightHour = document.getElementById('hour-right');
+        const rightMinute = document.getElementById('minute-right');
+        const rightClock = document.getElementById('clock-right');
+
+        let activeHand = null;
+        let baseHourAngle = 360;
+        let minuteAngle = 0;
+        let prevMinuteAngle = 0;
+
+        function updateRightDisplay() {
+        rightMinute.style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+        const finalHourAngle = baseHourAngle + (minuteAngle / 12);
+        rightHour.style.transform = `translateX(-50%) rotate(${finalHourAngle}deg)`;
+        }
+
+        const startDrag = (e) => { activeHand = e.target; document.body.style.cursor = 'grabbing'; };
+        const stopDrag = () => { activeHand = null; document.body.style.cursor = 'default'; };
+
+        const doDrag = (e) => {
+        if (!activeHand) return;
+        const rect = rightClock.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        let angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI + 90;
+        if (angle < 0) angle += 360;
+
+        if (activeHand.id === 'minute-right') {
+        if (prevMinuteAngle > 300 && angle < 60) baseHourAngle += 30;
+        else if (prevMinuteAngle < 60 && angle > 300) baseHourAngle -= 30;
+        minuteAngle = angle;
+        prevMinuteAngle = angle;
+        } else {
+        baseHourAngle = angle - (minuteAngle / 12);
+        }
+        updateRightDisplay();
+        };
+
+        rightMinute.addEventListener('mousedown', startDrag);
+        rightHour.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', doDrag);
+        window.addEventListener('mouseup', stopDrag);
+
+        updateRightDisplay();
+    </script>
+</body>
+</html>
